@@ -2,7 +2,7 @@
 #xderm_mini2021_stable1
 clear
  injek () {
-sni=$(grep sni= /srv/http/config.txt|awk -F "=" '{print $2}')
+sni=$(grep sni= /home/config.txt|awk -F "=" '{print $2}')
 echo "#!/usr/bin/python
 import re
 import ssl
@@ -122,15 +122,15 @@ echo -e "\e[36;1m##############################################\e[0m"
 echo -e "      \e[35;1mXderm Mini SSL (ssh & vmess) 2021\e[0m\n\e[36;1m##############################################\e[0m\n"
 }
  routing () {
- mode=$(grep mode= /srv/http/config.txt|awk -F "=" '{print $2}')
+ mode=$(grep mode= /home/config.txt|awk -F "=" '{print $2}')
   if [ $mode -eq 0 ]; then
-  host=$(grep host= /srv/http/config.txt|awk -F "=" '{print $2}')
+  host=$(grep host= /home/config.txt|awk -F "=" '{print $2}')
   else
-   port=$(grep vmess: /srv/http/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d|awk -F '"port' '{print $2}'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
+   port=$(grep vmess: /home/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d|awk -F '"port' '{print $2}'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
     if [ -f $port ]; then
    echo -e "Akun vmess belom disetting!\n";exit
     fi
-   host=$(grep vmess: /srv/http/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d|awk -F '"add' '{print $2}'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
+   host=$(grep vmess: /home/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d|awk -F '"add' '{print $2}'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
   fi
 ifaces=$(ip r|grep default|awk '{print $3}')
  if [ ! -f $(echo $ifaces|awk -F "." '{print $2}') ]; then
@@ -158,23 +158,23 @@ killall -q sshpass openvpn autorekonek;killall -q v2ray
 kill $(ps w|grep python3|grep xderm.py|awk "NR==1"|awk '{print $1}') 2>/dev/null
 kill $(ps w|grep badvpn|grep tun|awk "NR==1"|awk '{print $1}') 2>/dev/null
 rm -rf screenlog.0;sleep 1
-host=$(grep host /srv/http/config.txt|awk -F "=" '{print $2}')
+host=$(grep host /home/config.txt|awk -F "=" '{print $2}')
 route del $host 2>/dev/null;route del 8.8.8.8 2>/dev/null
 if [ -f $(base64 --help 2>/dev/null|awk "NR==2"|awk '{print $1}') ]; then
  echo -e "Paket base64 belom terinstall. install dulu!\n";exit
 fi
-host=$(grep vmess: /srv/http/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d|awk -F '"add' '{print $2}'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g');route del $host 2>/dev/null
+host=$(grep vmess: /home/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d|awk -F '"add' '{print $2}'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g');route del $host 2>/dev/null
 }
 banner
 
 
  setup () {
-echo -e "\e[36;3m Memperbarui Repository...\e[0m";sleep 1;apt update;sleep 2;clear
+echo -e "\e[36;3m Memperbarui Repository...\e[0m";sleep 1;pacman -Sy;sleep 2;clear
 banner;echo -e "\e[36;3m Menginstall Paket build dan Pendukung...\e[0m";sleep 1;yes | pacman -S base-devel cmake git curl psmisc sshpass screen corkscrew openvpn python3-pip
 python3 -m pip install requests beautifulsoup4;python3 -m pip install -U requests[socks];sleep 2;clear
 banner;echo -e "\e[36;3m Mengunduh Paket badvpn...\e[0m";sleep 1;rm -rf badvpn;git clone https://github.com/ambrop72/badvpn.git;cd badvpn;sleep 2;clear
 banner;echo -e "\e[36;3m Persiapan build....\e[0m";sleep 1;cmake . -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_TUN2SOCKS=1;sleep 2;clear
-banner;echo -e "\e[36;3m Proses building.......\e[0m";sleep 1;make;sleep 2;wget -O /srv/http/config.txt https://raw.githubusercontent.com/ryanfauzi1/xderm-mini/main/config.txt;clear
+banner;echo -e "\e[36;3m Proses building.......\e[0m";sleep 1;make;sleep 2;wget -O /home/config.txt https://raw.githubusercontent.com/alfatihart/xderm-mini-mod/main/config.txt;clear
 banner;echo -e "\e[36;3m Memindahkan file paket ke sistem...\e[0m";sleep 1
 cp tun2socks/badvpn-tun2socks /usr/bin/;cd ..;rm -rf badvpn;sleep 2
 echo -e "\e[31;1m Setup Selesai.\e[0m\n"
@@ -206,12 +206,12 @@ echo -e "\e[31;1m Setup Selesai.\e[0m\n"
   
  start () {
 #########################
-  if [ -f $(grep mode= /srv/http/config.txt|awk -F "=" '{print $2}') ]; then
-echo "mode=0" >> /srv/http/config.txt
+  if [ -f $(grep mode= /home/config.txt|awk -F "=" '{print $2}') ]; then
+echo "mode=0" >> /home/config.txt
   fi
-pudp=$(grep pudp= /srv/http/config.txt 2>/dev/null|awk -F "=" '{print $2}')
-sni=$(grep sni= /srv/http/config.txt 2>/dev/null|awk -F "=" '{print $2}')
-mode=$(grep mode= /srv/http/config.txt|awk -F "=" '{print $2}')
+pudp=$(grep pudp= /home/config.txt 2>/dev/null|awk -F "=" '{print $2}')
+sni=$(grep sni= /home/config.txt 2>/dev/null|awk -F "=" '{print $2}')
+mode=$(grep mode= /home/config.txt|awk -F "=" '{print $2}')
    if [ -f $(badvpn-tun2socks -version 2>/dev/null|awk '{print $1}'|awk "NR==1") ]; then
     echo -e "Paket badvpn-tun2socks belom terinstall. install dulu!\n";exit
    fi   
@@ -223,23 +223,23 @@ if [ $mode -eq 1 ]; then
  echo -e "Paket base64 belom terinstall. install dulu!\n";exit
  fi
  flush;ssa=8;echo -e "\e[33;1m{$(date +%M:%S)}\e[0m Mode yang dipilih: \e[32;1m$mode [vmess]\e[0m"
- port=$(grep vmess: /srv/http/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"port' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
+ port=$(grep vmess: /home/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"port' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
     if [ -f $port ]; then
  echo "Akun vmess belom disetting!"
  echo "Jika merasa sudah setup, cek ulang confignya"
  echo "Pastikan confignya tidak ada font gaib"
  echo "(font seperti spasi yang tidak kelihatan)" exit
     fi
-mkdir -p /usr/local/etc/v2ray/;juuid=1;n=2
+mkdir -p /usr/local/etc/v2ray/
 
-uuid=$(grep vmess: /srv/http/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"id' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
-add=$(grep vmess: /srv/http/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"add' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
-host=$(grep vmess: /srv/http/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"host' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
-aid=$(grep vmess: /srv/http/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"aid' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
-net=$(grep vmess: /srv/http/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"net' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
-path=$(grep vmess: /srv/http/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"path' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
+uuid=$(grep vmess: /home/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"id' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
+add=$(grep vmess: /home/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"add' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
+host=$(grep vmess: /home/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"host' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
+aid=$(grep vmess: /home/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"aid' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
+net=$(grep vmess: /home/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"net' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
+path=$(grep vmess: /home/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n  //g'|awk -F '"path' '{print $2}'|grep :|sed ':a;N;$!ba;s/\n/ /g'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g')
 path=$(echo $path|sed 's/\\u003d/=/g'|sed 's/\\u0026/\&/g')
-tls=$(grep vmess: /srv/http/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n/ /g'|awk -F 'tls":' '{print $2}'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g' -e 's/}//g')
+tls=$(grep vmess: /home/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|sed ':a;N;$!ba;s/\n/ /g'|awk -F 'tls":' '{print $2}'|awk -F ',' '{print $1}'|sed -e 's/://g' -e 's/ //g' -e 's/"//g' -e 's/}//g')
 if [ -f $tls ]; then
 tls=$(grep vmess: /www/xderm/config.txt 2>/dev/null|awk -F "//" '{print $2}'|base64 -d 2>/dev/null|grep tls|sed -e 's/:/=/g' -e 's/ //g' -e 's/"//g' -e 's/}//g'|awk -F "=" '{print $1}')
  if [ ! -f $tls ]; then
@@ -373,14 +373,14 @@ echo "{
 screen -dmS pimes v2ray -config /usr/local/etc/v2ray/config.json;routing
 echo -e "\e[33;1m{$(date +%M:%S)}\e[0m Menjalankan VMESS (di latarbelakang)....";sleep 1
 
-elif [ $(grep mode= /srv/http/config.txt|awk -F "=" '{print $2}') -eq 0 ]; then
-ssa=;host=$(grep host= /srv/http/config.txt|awk -F "=" '{print $2}')
+elif [ $(grep mode= /home/config.txt|awk -F "=" '{print $2}') -eq 0 ]; then
+ssa=;host=$(grep host= /home/config.txt|awk -F "=" '{print $2}')
  if [ -f $host ]; then
 echo -e "\e[33;1m{$(date +%M:%S)}\e[0m Config belom disetting !!\n";sleep 1;exit
  fi
-port=$(grep port= /srv/http/config.txt|awk -F "=" '{print $2}')
-user=$(grep user= /srv/http/config.txt|awk -F "=" '{print $2}')
-pass=$(grep pass= /srv/http/config.txt|awk -F "=" '{print $2}')
+port=$(grep port= /home/config.txt|awk -F "=" '{print $2}')
+user=$(grep user= /home/config.txt|awk -F "=" '{print $2}')
+pass=$(grep pass= /home/config.txt|awk -F "=" '{print $2}')
 #########################
 flush;killall -q timeout;ifaces=$(ip r|grep default|awk '{print $3}');routing
 echo -e "\e[33;1m{$(date +%M:%S)}\e[0m Mode yang dipilih: \e[32;1m$mode\e[0m"
@@ -397,7 +397,7 @@ else
 echo -e "\e[31;1mClosed!\e[0m";exit
  fi
 injek;echo "##############################################"
-host=$(grep host= /srv/http/config.txt|awk -F "=" '{print $2}')
+host=$(grep host= /home/config.txt|awk -F "=" '{print $2}')
 echo -e "  Host: $host\n  Port: $port\n  User: $user\n  Pass: $pass\n  SNI: $sni\n  Port UDPgw: $pudp\n##############################################"
 echo -e "\e[33;1m{$(date +%M:%S)}\e[0m Menjalankan SSH (di latarbelakang)....";sleep 1
 screen -L -dmS xderm sshpass -p "$pass" ssh -oTCPKeepAlive=yes -oServerAliveInterval=180 -oServerAliveCountMax=2 -oStrictHostKeyChecking=no -CND 127.0.0.1:1080 -p $port $user@$host -o "Proxycommand=corkscrew 127.0.0.1 8789 %h %p";sleep 2
@@ -433,7 +433,7 @@ echo -e "\e[33;1m{$(date +%M:%S)}\e[0m Menjalankan Badvpn-tun2socks....";sleep 1
   if [ -f $(iptables -t nat  -L|grep MASQ|grep tcp|awk '{print $1}') ]; then
 iptables -A POSTROUTING --proto tcp -t nat -o tun0 -j MASQUERADE
   fi
-pudp=$(grep pudp /srv/http/config.txt|awk -F "=" '{print $2}')
+pudp=$(grep pudp /home/config.txt|awk -F "=" '{print $2}')
 screen -dmS gerbang badvpn-tun2socks --tundev tun0 --netif-ipaddr 10.0.0.2 --netif-netmask 255.255.255.0 --socks-server-addr 127.0.0.1:1080$ssa --udpgw-remote-server-addr 127.0.0.1:$pudp --udpgw-transparent-dns --loglevel 0;sleep 4
 ifconfig tun0 10.0.0.1 netmask 255.255.255.0
 echo -e "\e[33;1m{$(date +%M:%S)}\e[0m Menggunakan \e[35;1m$ifaces\e[0m sebagai Pusat sumber.";sleep 1
